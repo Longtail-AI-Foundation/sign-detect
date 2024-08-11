@@ -1,6 +1,7 @@
 import sys
 import os
 import os.path as osp
+import cv2
 import numpy as np
 from copy import deepcopy
 import pickle
@@ -197,4 +198,23 @@ def normalize_in_bounds (data):
 
     return kpss
 
+def run_dwpose_on_video (model_ref, video_path) : 
+    """ 
+    run the dw pose model on the video path and additionally
+    record timestamps for later use
+    """
+    timestamps = []
+    cap = cv2.VideoCapture(video_path)
+    while cap.isOpened() : 
+        success, image = cap.read()
+        if not success: 
+            break
+        timestamps.append(cap.get(cv2.CAP_PROP_POS_MSEC))
 
+    # run dwpose
+    output = list(tqdm(model_ref(video_path), total=len(timestamps)))
+
+    for o, t in zip(output, timestamps): 
+        o['timestamp'] = t
+
+    return output

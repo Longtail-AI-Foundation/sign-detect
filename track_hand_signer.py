@@ -20,6 +20,16 @@ from itertools import cycle
 from more_itertools import take
 from sign_detect_model import load_model
 
+def get_video_info(video_path):
+    cap = cv2.VideoCapture(video_path)
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    fps = int(cap.get(cv2.CAP_PROP_FPS))
+    frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    duration = frame_count / fps
+    cap.release()
+    return dict(framerate=fps, duration=duration, width=width, height=height)
+
 def clamp (x, a, b) :
     return max(min(x, b), a)
 
@@ -81,38 +91,31 @@ def aspectRatioPreservingResize (arr, smaller_dim) :
     return np_arr
 
 if __name__ == "__main__" :
-    parser = argparse.ArgumentParser(description='Visualize poses')
+    parser = argparse.ArgumentParser(description='Run hand-signer detector on video')
+    parser.add_argument('--video_path', type=str, required=True, help='path to input video')
     parser.add_argument('--save_to', type=str, default='vid.mp4', help='where to save')
-
-    pose_pickle = '/home/ubuntu/general-purpose/ISL/dw_pose_clean/0ede63d064318ae6f7a6d17095164d67.pkl'
-    pose_hash = '0ede63d064318ae6f7a6d17095164d67'
 
     args = parser.parse_args()
 
-    model = load_model('lightning_logs/version_0')
+    # load models
+    model = load_model('lightning_logs/version_0') # classifies hand signers v other people
 
     dwpose_model = MMPoseInferencer(
         pose2d='rtmpose/rtmpose-l_8xb32-270e_coco-wholebody-384x288.py',
         pose2d_weights='rtmpose/rtmpose-l_simcc-ucoco_dw-ucoco_270e-384x288-2438fd99_20230728.pth',
-    )
-    width, height = 1920, 1080
+    ) # extracts whole body keypoints
 
-    with open(pose_pickle, 'rb') as fp : 
-        pose_sequence = pickle.load(fp)
-    
-    st = random.randint(0, len(pose_sequence) - 1 - 500)
-    en = st + 500
+    metadata = get_video_info(args.video_path)
+    width, height = metadata['width'], metadata['height'] 
 
-    print(f'Displaying from frame - {st} to {en}')
-
-    video_path = '/home/ubuntu/general-purpose/ISL/videos/ish_news/zzJqSaaVIUU.webm'
-    print('Path:', video_path)
-    print('Hash:', pose_hash)
+    print('Extracting wholebody keypoints from video ...') 
+    pose_sequence = mmt.run_dwpose_on_video(dwpose_model, args.video_path)
+    print('... done') 
 
     visualizer = dwpose_model.inferencer.visualizer
 
     fig = plt.figure()
-    cap = cv2.VideoCapture(video_path)
+    cap = cv2.VideoCapture(args.video_path)
 
     # populate key points and key point scores
     kpss, kpss_sc = [], []
@@ -125,15 +128,22 @@ if __name__ == "__main__" :
         for k in range(len(preds[0])) : 
             keypoints_np = np.array([preds[0][k]['keypoints']])
             keypoint_scores_np = np.array([preds[0][k]['keypoint_scores']])
-            keypoints.append(keypoints_np)
-            keypoint_scores.append(keypoint_scores_np)
+            if mmt.are_hands_visible(keypoint_scores_np) : 
+                keypoints.append(keypoints_np)
+                keypoint_scores.append(keypoint_scores_np)
 
         kpss.append(keypoints)
         kpss_sc.append(keypoint_scores)
 
+    print('Tracking persons across frames ...') 
     tracked_seqs = mmt.run_tracker(kpss, kpss_sc, 0.2, width, height)
+    print('... done') 
+
     tracked_seqs = [_ for _ in tracked_seqs if len(_) >= 60]
+
+    print('Classifying tracked persons ...') 
     tracked_seqs = [_ for _ in tqdm(tracked_seqs) if mmt.predict_on_kp_seq(model, kpss, kpss_sc, _) == 1]
+    print('... done') 
     
     colors = sample_k_colors(len(tracked_seqs))
 
@@ -182,13 +192,9 @@ if __name__ == "__main__" :
         else :
             new_image = image
 
-        if i >= st : 
-            images.append(aspectRatioPreservingResize(new_image, 512))
-
-        if i >= en : 
-            break
+        images.append(aspectRatioPreservingResize(new_image, 512))
 
         i += 1
 
     cap.release()
-    images_to_video(args.save_to, images, dict(framerate=29))
+    images_to_video(args.save_to, images, metadata)
