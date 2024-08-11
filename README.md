@@ -6,7 +6,9 @@ Code for detecting and tracking Hand Signers (Indian Sign Language) in News Vide
 
 Please ensure you have `conda` installed and be prepared with the full path of your installation for which you'll be prompted. In my case, when I tested it on an A10 G on Lambda Labs, the path to my `conda` installation was `/home/ubuntu/miniconda3`. 
 
-Start by installing `mmpose`. The instructions for doing so can be found [here](https://mmpose.readthedocs.io/en/latest/installation.html). In short, you have to prepare a `conda` environment with name `openmmlab`. Then you have to install all the dependencies of `mmpose` and then the repository itself. Once this is done, use the following to run our detector on test videos.
+Start by installing `mmpose`. The instructions for doing so can be found [here](https://mmpose.readthedocs.io/en/latest/installation.html). In short, you have to prepare a `conda` environment with name `openmmlab`. Then you have to install all the dependencies of `mmpose` and then the repository itself. 
+
+Then, go to the releases section in this repository and download the `dwpose` ckeckpoint. Place this checkpoint in the folder `rtmpose`. Once this is done, use the following to run our detector on test videos.
 
 ```
 conda activate openmmlab
