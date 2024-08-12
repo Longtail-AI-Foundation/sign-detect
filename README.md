@@ -8,7 +8,7 @@ Please ensure you have `conda` installed and be prepared with the full path of y
 
 Start by installing `mmpose`. The instructions for doing so can be found [here](https://mmpose.readthedocs.io/en/latest/installation.html). In short, you have to prepare a `conda` environment with name `openmmlab`. Then you have to install all the dependencies of `mmpose` and then the repository itself. 
 
-Then, go to the releases section in this repository and download the `dwpose` ckeckpoint. Place this checkpoint in the folder `rtmpose`. Once this is done, use the following to run our detector on test videos.
+Then, go to the releases section in this repository (`sign-detect`) and download the `dwpose` ckeckpoint. Place this checkpoint in the folder `rtmpose`, that should already exist in the root of this repository. Once this is done, use the following to run our detector on test videos.
 
 ```
 conda activate openmmlab
