@@ -7,3 +7,5 @@ tiktoken
 tqdm
 matplotlib
 pandas
+pytorch_lightning
+snorkel
