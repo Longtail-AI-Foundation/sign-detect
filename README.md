@@ -1,6 +1,11 @@
 # Sign-Detect
 
-Code for detecting and tracking Hand Signers (Indian Sign Language) in News Video. Please see [this post](https://vrroom.github.io/blog/2024/08/11/sign-detection.html) for more details
+Code for detecting and tracking Hand Signers (Indian Sign Language) in News Video. Please see [this post](https://vrroom.github.io/blog/2024/08/11/sign-detection.html) for more details.
+
+![image](https://github.com/user-attachments/assets/c2f31074-cdae-4ef5-9367-156adc024c51)
+Our Hand-Signer detection model is able to detect hand-signers in News Videos with (a) multiple people present (b) in multiple views. The hand-signers are marked by a bounding box.
+
+[Longtail AI Foundation](https://longtailai.org/)
 
 ## Installation
 
