@@ -1,6 +1,6 @@
 # Sign-Detect
 
-Code for detecting and tracking Hand Signers (Indian Sign Language) in News Video. Please see [todo](www.abc.com] for more details
+Code for detecting and tracking Hand Signers (Indian Sign Language) in News Video. Please see [this post](https://vrroom.github.io/blog/2024/08/11/sign-detection.html) for more details
 
 ## Installation
 
